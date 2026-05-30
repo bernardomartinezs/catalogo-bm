@@ -1,5 +1,5 @@
 const JSONBIN_ID = '6a1b306addf5aa59f77931ce';
-const JSONBIN_KEY = '$2a$10$Zwb8odSEJRJ26YLeEjwg.uXOkPbPRyRvC.FE5tvWlvgrK38/2nf5';
+const JSONBIN_KEY = '$2a$10$Zwb8odSEJRJ26YLeEjwg.uXOkPbPRyRvC.FE5tvWlvgrK38/2nf5.';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY || '';
 const BASE_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
 
