@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B|M — De la biblioteca de El hijo del lechero</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Jost', sans-serif; font-weight: 300; background: #fafaf8; color: #1a1a18; min-height: 100vh; }
+.app { max-width: 980px; margin: 0 auto; padding: 2rem 1.25rem; }
+
+.header { text-align: center; margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 0.5px solid #d4d2c8; }
+.monogram { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 52px; letter-spacing: 0.15em; color: #1a1a18; line-height: 1; margin-bottom: 0.4rem; }
+.monogram-sep { display: inline-block; border-left: 0.5px solid #1a1a18; margin: 0 0.4em; height: 40px; vertical-align: middle; }
+.subtitle { font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: #888880; }
+.view-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: #8B7355; margin-top: 0.5rem; }
+
+.tabs { display: flex; gap: 2rem; margin-bottom: 2rem; border-bottom: 0.5px solid #d4d2c8; overflow-x: auto; }
+.tab { font-family: 'Jost', sans-serif; font-weight: 300; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #888880; padding-bottom: 0.85rem; cursor: pointer; border: none; border-bottom: 1px solid transparent; margin-bottom: -0.5px; background: none; transition: color 0.2s; white-space: nowrap; }
+.tab:hover { color: #1a1a18; }
+.tab.active { color: #1a1a18; border-bottom-color: #1a1a18; }
+.section { display: none; }
+.section.active { display: block; }
+
+.scan-area { border: 0.5px dashed #c4c2b8; padding: 1.25rem; margin-bottom: 1.75rem; text-align: center; background: #f9f8f6; }
+.scan-title { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: #888880; margin-bottom: 0.75rem; }
+.scan-photos { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+.scan-photo-btn { position: relative; cursor: pointer; }
+.scan-photo-btn input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.scan-photo-box { width: 100px; height: 80px; border: 0.5px solid #c4c2b8; background: #fafaf8; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.25rem; font-size: 10px; color: #c4c2b8; letter-spacing: 0.1em; text-transform: uppercase; overflow: hidden; }
+.scan-photo-box img { width: 100%; height: 100%; object-fit: cover; }
+.scan-photo-label { font-size: 9px; color: #aaa9a0; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.25rem; text-align: center; }
+.btn-scan { font-family: 'Jost', sans-serif; font-weight: 400; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; padding: 0.65rem 2rem; cursor: pointer; border: 0.5px solid #1a1a18; background: #1a1a18; color: #fafaf8; transition: opacity 0.15s; }
+.btn-scan:hover { opacity: 0.8; }
+.btn-scan:disabled { opacity: 0.4; cursor: not-allowed; }
+.scan-status { font-size: 12px; color: #888880; margin-top: 0.75rem; min-height: 18px; }
+
+.form { background: #f4f3f0; border: 0.5px solid #d4d2c8; padding: 1.75rem; margin-bottom: 2rem; }
+.form-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 1.5rem; letter-spacing: 0.05em; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+.form-full { grid-column: 1 / -1; }
+.field label { display: block; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #888880; margin-bottom: 0.45rem; }
+.field input, .field select, .field textarea { width: 100%; font-family: 'Jost', sans-serif; font-weight: 300; font-size: 14px; background: #fafaf8; border: 0.5px solid #c4c2b8; color: #1a1a18; padding: 0.55rem 0.8rem; border-radius: 0; outline: none; transition: border-color 0.15s; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: #1a1a18; }
+.field textarea { resize: vertical; min-height: 56px; }
+.field input.autofilled { background: #f0f4f0; border-color: #5A7A5A; }
+
+.soporte-selector { display: flex; gap: 1px; background: #d4d2c8; margin-bottom: 1.5rem; }
+.soporte-btn { flex: 1; font-family: 'Jost', sans-serif; font-weight: 300; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 0.8rem; border: none; background: #f4f3f0; color: #888880; cursor: pointer; transition: all 0.15s; }
+.soporte-btn:hover { color: #1a1a18; }
+.soporte-btn.active { background: #1a1a18; color: #fafaf8; }
+
+.toggle-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.toggle { font-family: 'Jost', sans-serif; font-weight: 300; font-size: 12px; letter-spacing: 0.08em; padding: 0.35rem 0.85rem; border: 0.5px solid #c4c2b8; background: #fafaf8; color: #888880; cursor: pointer; transition: all 0.15s; }
+.toggle:hover { border-color: #1a1a18; color: #1a1a18; }
+.toggle.selected { background: #1a1a18; color: #fafaf8; border-color: #1a1a18; }
+.otro-input { margin-top: 0.5rem; display: none; }
+.otro-input.visible { display: block; }
+.campos-fisico { display: none; }
+.campos-fisico.visible { display: contents; }
+
+.btn-row { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 0.5px solid #d4d2c8; flex-wrap: wrap; }
+.btn { font-family: 'Jost', sans-serif; font-weight: 400; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; padding: 0.6rem 1.5rem; cursor: pointer; border: 0.5px solid #c4c2b8; background: none; color: #888880; transition: all 0.15s; }
+.btn:hover { color: #1a1a18; border-color: #1a1a18; }
+.btn-primary { background: #1a1a18; color: #fafaf8; border-color: #1a1a18; }
+.btn-primary:hover { opacity: 0.8; }
+.btn-share { border-color: #8B7355; color: #8B7355; }
+.btn-share:hover { background: #8B7355; color: #fafaf8; border-color: #8B7355; }
+
+.share-row { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: #d4d2c8; border: 0.5px solid #d4d2c8; margin-bottom: 1.75rem; }
+.stat { background: #fafaf8; padding: 1rem; text-align: center; }
+.stat-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; line-height: 1; margin-bottom: 0.25rem; }
+.stat-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #888880; }
+
+.filter-row { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+.filter-row input, .filter-row select { font-family: 'Jost', sans-serif; font-weight: 300; font-size: 12px; background: #f4f3f0; border: 0.5px solid #c4c2b8; color: #1a1a18; padding: 0.4rem 0.8rem; outline: none; border-radius: 0; }
+.filter-row input { flex: 1; min-width: 160px; }
+
+.vitrina-label { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #888880; margin-bottom: 0.6rem; margin-top: 1.5rem; padding-bottom: 0.4rem; border-bottom: 0.5px solid #d4d2c8; }
+.book-list { display: flex; flex-direction: column; gap: 0.5px; background: #d4d2c8; }
+.book-item { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 80px; gap: 0.85rem; align-items: center; background: #fafaf8; padding: 0.9rem 1.1rem; font-size: 13px; transition: background 0.1s; }
+.book-item:hover { background: #f4f3f0; }
+.book-title { font-weight: 400; color: #1a1a18; }
+.book-author { color: #888880; font-size: 12px; margin-top: 2px; }
+.book-meta { font-size: 11px; color: #aaa9a0; line-height: 1.6; }
+
+.badge { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.55rem; border: 0.5px solid #c4c2b8; color: #888880; white-space: nowrap; display: inline-block; }
+.badge-v1 { border-color: #8B7355; color: #8B7355; }
+.badge-v2 { border-color: #5A7A5A; color: #5A7A5A; }
+.badge-v3 { border-color: #888880; color: #888880; }
+.badge-v4 { border-color: #c4c2b8; color: #c4c2b8; }
+.badge-digital { border-color: #7a88a0; color: #7a88a0; }
+.badge-alta { border-color: #8B7355; color: #8B7355; }
+.badge-media { border-color: #888880; color: #888880; }
+.badge-baja { border-color: #c4c2b8; color: #c4c2b8; }
+
+.book-actions { display: flex; gap: 0.35rem; justify-content: flex-end; }
+.action-btn { background: none; border: none; color: #c4c2b8; cursor: pointer; font-size: 15px; padding: 0.2rem; transition: color 0.15s; line-height: 1; }
+.action-btn:hover { color: #1a1a18; }
+
+.empty { text-align: center; padding: 3rem 2rem; color: #c4c2b8; font-size: 12px; letter-spacing: 0.12em; border: 0.5px dashed #d4d2c8; }
+.empty-monogram { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-style: italic; margin-bottom: 0.6rem; opacity: 0.3; display: block; }
+
+.pendiente-item { display: grid; grid-template-columns: 2fr 1fr 1fr 80px; gap: 0.85rem; align-items: center; background: #fafaf8; padding: 0.9rem 1.1rem; font-size: 13px; transition: background 0.1s; }
+.pendiente-item:hover { background: #f4f3f0; }
+.pendiente-item-readonly { grid-template-columns: 2fr 1fr 1fr; }
+
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,26,24,0.55); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay.visible { display: flex; }
+.modal { background: #fafaf8; border: 0.5px solid #d4d2c8; padding: 1.75rem; max-width: 500px; width: 100%; max-height: 85vh; overflow-y: auto; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 1.25rem; }
+.modal-row { display: flex; gap: 1rem; font-size: 12px; margin-bottom: 0.4rem; line-height: 1.7; border-bottom: 0.5px solid #f0efe8; padding-bottom: 0.4rem; }
+.modal-key { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #888880; min-width: 120px; padding-top: 2px; }
+.modal-val { color: #1a1a18; }
+
+.toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1a1a18; color: #fafaf8; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.7rem 1.25rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
+.toast.visible { opacity: 1; }
+
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-full { grid-column: 1; }
+  .stats { grid-template-columns: repeat(3, 1fr); }
+  .book-item { grid-template-columns: 1fr 70px; }
+  .book-item > div:nth-child(2), .book-item > div:nth-child(3), .book-item > div:nth-child(4) { display: none; }
+  .pendiente-item { grid-template-columns: 1fr 70px; }
+  .pendiente-item > div:nth-child(2), .pendiente-item > div:nth-child(3) { display: none; }
+  .tabs { gap: 1.25rem; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="monogram">B<span class="monogram-sep"></span>M</div>
+    <div class="subtitle">De la biblioteca de El hijo del lechero</div>
+    <div class="view-label" id="view-label" style="display:none;"></div>
+  </div>
+
+  <div class="tabs" id="main-tabs">
+    <button class="tab active" id="tab-btn-registro" onclick="showTab('registro', this)">Registro</button>
+    <button class="tab" id="tab-btn-biblioteca" onclick="showTab('biblioteca', this)">Biblioteca</button>
+    <button class="tab" id="tab-btn-pendientes" onclick="showTab('pendientes', this)">Pendientes</button>
+  </div>
+
+  <!-- REGISTRO -->
+  <div id="tab-registro" class="section active">
+    <div class="scan-area">
+      <div class="scan-title">Escanear libro con IA</div>
+      <div class="scan-photos">
+        <div>
+          <div class="scan-photo-btn">
+            <div class="scan-photo-box" id="preview-portada"><span style="font-size:22px;opacity:0.3">📷</span><span>Portada</span></div>
+            <input type="file" accept="image/*" capture="environment" onchange="setFoto(event,'portada')">
+          </div>
+          <div class="scan-photo-label">Portada</div>
+        </div>
+        <div>
+          <div class="scan-photo-btn">
+            <div class="scan-photo-box" id="preview-derechos"><span style="font-size:22px;opacity:0.3">📄</span><span>Página</span></div>
+            <input type="file" accept="image/*" capture="environment" onchange="setFoto(event,'derechos')">
+          </div>
+          <div class="scan-photo-label">Pág. de derechos</div>
+        </div>
+      </div>
+      <button class="btn-scan" id="btn-escanear" onclick="escanearLibro()" disabled>Extraer datos con IA</button>
+      <div class="scan-status" id="scan-status"></div>
+    </div>
+
+    <div class="form">
+      <div class="form-title" id="form-titulo-label">Nuevo libro</div>
+      <input type="hidden" id="edit-idx" value="">
+      <div class="field form-full" style="margin-bottom:0.25rem;"><label>Soporte</label></div>
+      <div class="soporte-selector">
+        <button class="soporte-btn" id="btn-fisico" onclick="setSoporte('fisico')">Físico</button>
+        <button class="soporte-btn" id="btn-digital" onclick="setSoporte('digital')">Digital</button>
+      </div>
+      <div class="form-grid">
+        <div class="field form-full"><label>Título</label><input type="text" id="f-titulo" placeholder="Título del libro"></div>
+        <div class="field"><label>Autor</label><input type="text" id="f-autor" placeholder="Apellido, Nombre"></div>
+        <div class="field">
+          <label>Idioma</label>
+          <div class="toggle-group" id="tg-idioma">
+            <button class="toggle" onclick="toggleSingle(this,'tg-idioma')">Español</button>
+            <button class="toggle" onclick="toggleSingle(this,'tg-idioma')">Inglés</button>
+            <button class="toggle" onclick="toggleSingle(this,'tg-idioma')">Portugués</button>
+            <button class="toggle" onclick="toggleSingle(this,'tg-idioma','f-idioma-otro')">Otro</button>
+          </div>
+          <input type="text" id="f-idioma-otro" class="otro-input" placeholder="Especifica el idioma">
+        </div>
+        <div class="field campos-fisico"><label>Formato</label><div class="toggle-group" id="tg-formato"><button class="toggle" onclick="toggleSingle(this,'tg-formato')">Tapa dura</button><button class="toggle" onclick="toggleSingle(this,'tg-formato')">Pasta blanda</button></div></div>
+        <div class="field campos-fisico"><label>Edición</label><div class="toggle-group" id="tg-edicion"><button class="toggle" onclick="toggleSingle(this,'tg-edicion')">Primera</button><button class="toggle" onclick="toggleSingle(this,'tg-edicion')">Reimpresión</button><button class="toggle" onclick="toggleSingle(this,'tg-edicion')">Especial</button></div></div>
+        <div class="field campos-fisico"><label>Impresión</label><div class="toggle-group" id="tg-impresion"><button class="toggle" onclick="toggleSingle(this,'tg-impresion')">1ª</button><button class="toggle" onclick="toggleSingle(this,'tg-impresion')">2ª–5ª</button><button class="toggle" onclick="toggleSingle(this,'tg-impresion')">6ª+</button><button class="toggle" onclick="toggleSingle(this,'tg-impresion')">N/D</button></div></div>
+        <div class="field campos-fisico"><label>Editorial</label><input type="text" id="f-editorial" placeholder="p.e. Knopf, Companhia das Letras"></div>
+        <div class="field campos-fisico"><label>Año</label><input type="text" id="f-anio" placeholder="2026"></div>
+        <div class="field campos-fisico"><label>País de publicación</label><input type="text" id="f-pais" placeholder="p.e. USA, Brasil, España"></div>
+        <div class="field campos-fisico"><label>Condición</label><div class="toggle-group" id="tg-estado"><button class="toggle" onclick="toggleSingle(this,'tg-estado')">Fine</button><button class="toggle" onclick="toggleSingle(this,'tg-estado')">Very Good</button><button class="toggle" onclick="toggleSingle(this,'tg-estado')">Good</button><button class="toggle" onclick="toggleSingle(this,'tg-estado')">Fair</button></div></div>
+        <div class="field campos-fisico"><label>Sobrecubierta</label><div class="toggle-group" id="tg-sobrecubierta"><button class="toggle" onclick="toggleSingle(this,'tg-sobrecubierta')">Sí</button><button class="toggle" onclick="toggleSingle(this,'tg-sobrecubierta')">No</button><button class="toggle" onclick="toggleSingle(this,'tg-sobrecubierta')">N/A</button></div></div>
+        <div class="field campos-fisico"><label>Forro Brodart</label><div class="toggle-group" id="tg-brodart"><button class="toggle" onclick="toggleSingle(this,'tg-brodart')">Sí</button><button class="toggle" onclick="toggleSingle(this,'tg-brodart')">No</button></div></div>
+        <div class="field campos-fisico"><label>Firmado</label><div class="toggle-group" id="tg-firmado"><button class="toggle" onclick="toggleSingle(this,'tg-firmado')">No</button><button class="toggle" onclick="toggleSingle(this,'tg-firmado')">Sí</button><button class="toggle" onclick="toggleSingle(this,'tg-firmado')">Con dedicatoria</button></div></div>
+        <div class="field form-full campos-fisico"><label>Vitrina</label><div class="toggle-group" id="tg-vitrina"><button class="toggle" onclick="toggleSingle(this,'tg-vitrina')">1 — Inversión</button><button class="toggle" onclick="toggleSingle(this,'tg-vitrina')">2 — Colección</button><button class="toggle" onclick="toggleSingle(this,'tg-vitrina')">3 — Biblioteca</button><button class="toggle" onclick="toggleSingle(this,'tg-vitrina')">4 — Circular</button></div></div>
+        <div class="field campos-fisico"><label>Valor estimado (USD)</label><input type="text" id="f-valor" placeholder="p.e. 35"></div>
+        <div class="field form-full"><label>Notas — historia, dónde se compró</label><textarea id="f-notas" placeholder="p.e. Comprado en Magers, Minneapolis, abril 2026."></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btn-cancelar-edicion" onclick="cancelarEdicion()" style="display:none;">Cancelar</button>
+        <button class="btn" onclick="limpiarFormulario()">Limpiar</button>
+        <button class="btn btn-primary" id="btn-guardar" onclick="guardarLibro()">Registrar libro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIBLIOTECA -->
+  <div id="tab-biblioteca" class="section">
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+      <div class="stat"><div class="stat-num" id="stat-fisicos">0</div><div class="stat-label">Físicos</div></div>
+      <div class="stat"><div class="stat-num" id="stat-digitales">0</div><div class="stat-label">Digitales</div></div>
+      <div class="stat"><div class="stat-num" id="stat-v1">0</div><div class="stat-label">Inversión</div></div>
+      <div class="stat"><div class="stat-num" id="stat-v2">0</div><div class="stat-label">Colección</div></div>
+    </div>
+
+    <!-- BOTONES COMPARTIR — solo visibles en modo editor -->
+    <div class="share-row" id="share-row">
+      <button class="btn btn-share" onclick="compartir('biblioteca')">Compartir biblioteca</button>
+      <button class="btn btn-share" onclick="compartir('pendientes')">Compartir pendientes</button>
+    </div>
+
+    <div class="filter-row">
+      <input type="text" id="filtro-texto" placeholder="Buscar título o autor..." oninput="renderBiblioteca()">
+      <select id="filtro-vitrina" onchange="renderBiblioteca()">
+        <option value="">Todas las vitrinas</option>
+        <option value="1">Vitrina 1 — Inversión</option>
+        <option value="2">Vitrina 2 — Colección</option>
+        <option value="3">Vitrina 3 — Biblioteca</option>
+        <option value="4">Vitrina 4 — Circular</option>
+      </select>
+      <select id="filtro-soporte" onchange="renderBiblioteca()">
+        <option value="">Físico y Digital</option>
+        <option value="fisico">Solo Físicos</option>
+        <option value="digital">Solo Digitales</option>
+      </select>
+    </div>
+    <div id="lista-biblioteca"></div>
+  </div>
+
+  <!-- PENDIENTES -->
+  <div id="tab-pendientes" class="section">
+    <div class="form" id="form-pendiente">
+      <div class="form-title">Agregar pendiente</div>
+      <div class="form-grid">
+        <div class="field form-full"><label>Título</label><input type="text" id="p-titulo" placeholder="Título del libro"></div>
+        <div class="field"><label>Autor</label><input type="text" id="p-autor" placeholder="Apellido, Nombre"></div>
+        <div class="field"><label>Razón</label><div class="toggle-group" id="tg-p-razon"><button class="toggle" onclick="toggleSingle(this,'tg-p-razon')">Quiero leerlo</button><button class="toggle" onclick="toggleSingle(this,'tg-p-razon')">Colección / Inversión</button><button class="toggle" onclick="toggleSingle(this,'tg-p-razon')">Ambos</button></div></div>
+        <div class="field"><label>Prioridad</label><div class="toggle-group" id="tg-p-prioridad"><button class="toggle" onclick="toggleSingle(this,'tg-p-prioridad')">Alta</button><button class="toggle" onclick="toggleSingle(this,'tg-p-prioridad')">Media</button><button class="toggle" onclick="toggleSingle(this,'tg-p-prioridad')">Baja</button></div></div>
+        <div class="field form-full"><label>Notas</label><textarea id="p-notas" placeholder="p.e. Buscar primera edición Knopf 1985 — Blood Meridian"></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="limpiarPendiente()">Limpiar</button>
+        <button class="btn btn-primary" onclick="agregarPendiente()">Agregar</button>
+      </div>
+    </div>
+    <div id="lista-pendientes"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-titulo"></div>
+    <div id="modal-contenido"></div>
+    <div class="btn-row" style="margin-top:1rem;padding-top:1rem;border-top:0.5px solid #d4d2c8;">
+      <button class="btn" onclick="cerrarModalBtn()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api/data';
+let libros = [], pendientes = [];
+let soporte = '';
+let fotoPortada = null, fotoDerechos = null;
+
+// Detectar modo de vista
+const params = new URLSearchParams(window.location.search);
+const viewMode = params.get('view'); // 'biblioteca' | 'pendientes' | null (editor)
+const isReadOnly = !!viewMode;
+
+function initView() {
+  if (isReadOnly) {
+    // Ocultar pestaña Registro
+    document.getElementById('tab-btn-registro').style.display = 'none';
+    document.getElementById('share-row').style.display = 'none';
+    document.getElementById('form-pendiente').style.display = 'none';
+
+    if (viewMode === 'biblioteca') {
+      document.getElementById('view-label').textContent = 'Vista compartida — Biblioteca';
+      document.getElementById('view-label').style.display = 'block';
+      document.getElementById('tab-btn-biblioteca').click();
+      document.getElementById('tab-btn-pendientes').style.display = 'none';
+      document.getElementById('tab-registro').style.display = 'none';
+    } else if (viewMode === 'pendientes') {
+      document.getElementById('view-label').textContent = 'Vista compartida — Lista de deseos';
+      document.getElementById('view-label').style.display = 'block';
+      document.getElementById('tab-btn-pendientes').click();
+      document.getElementById('tab-btn-biblioteca').style.display = 'none';
+      document.getElementById('tab-registro').style.display = 'none';
+    }
+  } else {
+    // Modo editor — mostrar todo
+    document.getElementById('tab-btn-registro').style.display = '';
+    document.getElementById('share-row').style.display = '';
+  }
+}
+
+function compartir(tipo) {
+  const url = window.location.origin + window.location.pathname + '?view=' + tipo;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('Link copiado al portapapeles');
+  }).catch(() => {
+    prompt('Copia este link:', url);
+  });
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 2500);
+}
+
+async function loadData() {
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+    libros = data.libros || [];
+    pendientes = data.pendientes || [];
+  } catch(e) { libros = []; pendientes = []; }
+}
+
+async function saveData() {
+  showToast('Guardando...');
+  try {
+    await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save', data: { libros, pendientes } })
+    });
+    showToast('✓ Guardado');
+  } catch(e) { showToast('Error al guardar'); }
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function setFoto(event, tipo) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    if (tipo === 'portada') { fotoPortada = base64; document.getElementById('preview-portada').innerHTML = '<img src="'+base64+'">'; }
+    else { fotoDerechos = base64; document.getElementById('preview-derechos').innerHTML = '<img src="'+base64+'">'; }
+    document.getElementById('btn-escanear').disabled = !(fotoPortada || fotoDerechos);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function escanearLibro() {
+  const btn = document.getElementById('btn-escanear');
+  const status = document.getElementById('scan-status');
+  btn.disabled = true;
+  status.textContent = 'Analizando imágenes...';
+  try {
+    const body = { action: 'scan' };
+    if (fotoPortada) { body.portada = fotoPortada.split(',')[1]; body.portadaMime = fotoPortada.split(';')[0].split(':')[1]; }
+    if (fotoDerechos) { body.derechos = fotoDerechos.split(',')[1]; body.derechosMime = fotoDerechos.split(';')[0].split(':')[1]; }
+    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const extracted = await res.json();
+    if (extracted.error) throw new Error(extracted.error);
+    ['titulo','autor','editorial','anio','pais'].forEach(c => {
+      const el = document.getElementById('f-'+c);
+      if (el && extracted[c]) { el.value = extracted[c]; el.classList.add('autofilled'); }
+    });
+    if (extracted.idioma) setToggleValue('tg-idioma', extracted.idioma);
+    if (extracted.edicion) setToggleValue('tg-edicion', extracted.edicion);
+    if (extracted.impresion) setToggleValue('tg-impresion', extracted.impresion);
+    if (extracted.formato) setToggleValue('tg-formato', extracted.formato);
+    if (extracted.formato && !soporte) setSoporte('fisico');
+    status.textContent = '✓ Datos extraídos. Revisa y completa vitrina y condición.';
+  } catch(e) {
+    status.textContent = 'Error en el escaneo. Verifica tu conexión.';
+  }
+  btn.disabled = false;
+}
+
+function getToggleValue(gid, otroCampo) {
+  const sel = document.querySelector('#'+gid+' .toggle.selected');
+  if (!sel) return '';
+  if (otroCampo && sel.textContent.trim() === 'Otro') return document.getElementById(otroCampo).value.trim() || 'Otro';
+  return sel.textContent.trim();
+}
+
+function setToggleValue(gid, value) {
+  document.querySelectorAll('#'+gid+' .toggle').forEach(b => b.classList.toggle('selected', b.textContent.trim() === value));
+}
+
+function toggleSingle(btn, gid, otroCampoId) {
+  document.querySelectorAll('#'+gid+' .toggle').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  if (otroCampoId) {
+    const campo = document.getElementById(otroCampoId);
+    if (btn.textContent.trim() === 'Otro') { campo.classList.add('visible'); campo.focus(); }
+    else { campo.classList.remove('visible'); campo.value = ''; }
+  }
+}
+
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'biblioteca') renderBiblioteca();
+  if (tab === 'pendientes') renderPendientes();
+}
+
+function setSoporte(s) {
+  soporte = s;
+  document.getElementById('btn-fisico').classList.toggle('active', s === 'fisico');
+  document.getElementById('btn-digital').classList.toggle('active', s === 'digital');
+  document.querySelectorAll('.campos-fisico').forEach(el => el.classList.toggle('visible', s === 'fisico'));
+}
+
+function vitrinaBadge(v) {
+  if (!v) return '';
+  const cls = v.startsWith('1')?'badge-v1':v.startsWith('2')?'badge-v2':v.startsWith('3')?'badge-v3':'badge-v4';
+  const label = v.startsWith('1')?'Inversión':v.startsWith('2')?'Colección':v.startsWith('3')?'Biblioteca':'Circular';
+  return '<span class="badge '+cls+'">'+label+'</span>';
+}
+
+function prioridadBadge(p) {
+  if (!p) return '';
+  const cls = p==='Alta'?'badge-alta':p==='Media'?'badge-media':'badge-baja';
+  return '<span class="badge '+cls+'">'+p+'</span>';
+}
+
+function renderBiblioteca() {
+  const texto = (document.getElementById('filtro-texto').value||'').toLowerCase();
+  const vitrina = document.getElementById('filtro-vitrina').value;
+  const soporteFiltro = document.getElementById('filtro-soporte').value;
+  const filtrados = libros.filter(l => {
+    const match = (l.titulo+' '+l.autor).toLowerCase().includes(texto);
+    const vMatch = !vitrina||(l.vitrina&&l.vitrina.startsWith(vitrina));
+    const sMatch = !soporteFiltro||l.soporte===soporteFiltro;
+    return match&&vMatch&&sMatch;
+  });
+  document.getElementById('stat-total').textContent = libros.length;
+  document.getElementById('stat-fisicos').textContent = libros.filter(l=>l.soporte==='fisico').length;
+  document.getElementById('stat-digitales').textContent = libros.filter(l=>l.soporte==='digital').length;
+  document.getElementById('stat-v1').textContent = libros.filter(l=>l.vitrina&&l.vitrina.startsWith('1')).length;
+  document.getElementById('stat-v2').textContent = libros.filter(l=>l.vitrina&&l.vitrina.startsWith('2')).length;
+  const el = document.getElementById('lista-biblioteca');
+  if (!filtrados.length) { el.innerHTML='<div class="empty"><span class="empty-monogram">B|M</span>Ningún libro registrado aún</div>'; return; }
+  const grupos = {};
+  filtrados.forEach(l => { const g=l.soporte==='digital'?'Digital':(l.vitrina||'Sin vitrina'); if(!grupos[g])grupos[g]=[]; grupos[g].push(l); });
+  let html = '';
+  const orden = ['1 — Inversión','2 — Colección','3 — Biblioteca','4 — Circular','Sin vitrina','Digital'];
+  const keys = orden.filter(k=>grupos[k]).concat(Object.keys(grupos).filter(k=>!orden.includes(k)));
+  keys.forEach(g => {
+    html += '<div class="vitrina-label">'+g+'</div><div class="book-list">';
+    grupos[g].forEach(l => {
+      const idx = libros.indexOf(l);
+      const badge = l.soporte==='digital'?'<span class="badge badge-digital">Digital</span>':vitrinaBadge(l.vitrina);
+      const actions = isReadOnly
+        ? `<button class="action-btn" onclick="verDetalle(${idx})" title="Ver detalle">&#9432;</button>`
+        : `<button class="action-btn" onclick="verDetalle(${idx})" title="Ver detalle">&#9432;</button>
+           <button class="action-btn" onclick="editarLibro(${idx})" title="Editar">&#9998;</button>
+           <button class="action-btn" onclick="eliminarLibro(${idx})" title="Eliminar">&#10005;</button>`;
+      html += `<div class="book-item">
+        <div><div class="book-title">${esc(l.titulo)}</div><div class="book-author">${esc(l.autor)}</div></div>
+        <div class="book-meta">${l.editorial?esc(l.editorial):''}${l.anio?' · '+l.anio:''}${l.pais?'<br>'+esc(l.pais):''}</div>
+        <div class="book-meta">${l.edicion||''}${l.impresion?' · '+l.impresion:''}${l.estado?'<br>'+esc(l.estado):''}</div>
+        <div>${badge}</div>
+        <div class="book-actions">${actions}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function verDetalle(idx) {
+  const l = libros[idx];
+  document.getElementById('modal-titulo').textContent = l.titulo;
+  const campos = [['Autor',l.autor],['Soporte',l.soporte==='fisico'?'Físico':'Digital'],['Idioma',l.idioma],['Formato',l.formato],['Edición',l.edicion],['Impresión',l.impresion],['Editorial',l.editorial],['Año',l.anio],['País',l.pais],['Condición',l.estado],['Sobrecubierta',l.sobrecubierta],['Forro Brodart',l.brodart],['Firmado',l.firmado],['Vitrina',l.vitrina],['Valor estimado',l.valor?'$'+l.valor+' USD':''],['Notas',l.notas],['Registrado',l.fecha]];
+  document.getElementById('modal-contenido').innerHTML = campos.filter(([,v])=>v).map(([k,v])=>`<div class="modal-row"><div class="modal-key">${k}</div><div class="modal-val">${esc(v)}</div></div>`).join('');
+  document.getElementById('modal-overlay').classList.add('visible');
+}
+
+function cerrarModal(e) { if(e.target.id==='modal-overlay') cerrarModalBtn(); }
+function cerrarModalBtn() { document.getElementById('modal-overlay').classList.remove('visible'); }
+
+function editarLibro(idx) {
+  const l = libros[idx];
+  document.getElementById('edit-idx').value = idx;
+  document.getElementById('form-titulo-label').textContent = 'Editar libro';
+  document.getElementById('btn-cancelar-edicion').style.display = '';
+  document.getElementById('btn-guardar').textContent = 'Guardar cambios';
+  setSoporte(l.soporte||'fisico');
+  ['titulo','autor','editorial','anio','pais','valor','notas'].forEach(f => { const el=document.getElementById('f-'+f); if(el) el.value=l[f]||''; });
+  const idiomasBase = ['Español','Inglés','Portugués'];
+  if (l.idioma && !idiomasBase.includes(l.idioma)) { setToggleValue('tg-idioma','Otro'); document.getElementById('f-idioma-otro').value=l.idioma; document.getElementById('f-idioma-otro').classList.add('visible'); }
+  else if (l.idioma) setToggleValue('tg-idioma',l.idioma);
+  ['formato','edicion','impresion','estado','sobrecubierta','brodart','firmado','vitrina'].forEach(f => { if(l[f]) setToggleValue('tg-'+f,l[f]); });
+  document.getElementById('tab-btn-registro').click();
+  window.scrollTo(0,0);
+}
+
+function cancelarEdicion() {
+  document.getElementById('edit-idx').value = '';
+  document.getElementById('form-titulo-label').textContent = 'Nuevo libro';
+  document.getElementById('btn-cancelar-edicion').style.display = 'none';
+  document.getElementById('btn-guardar').textContent = 'Registrar libro';
+  limpiarFormulario();
+}
+
+async function guardarLibro() {
+  const titulo = document.getElementById('f-titulo').value.trim();
+  const autor = document.getElementById('f-autor').value.trim();
+  if (!titulo||!autor) { alert('Título y autor son obligatorios'); return; }
+  if (!soporte) { alert('Selecciona Físico o Digital'); return; }
+  const libro = {
+    soporte, titulo, autor,
+    idioma: getToggleValue('tg-idioma','f-idioma-otro'),
+    formato: soporte==='fisico'?getToggleValue('tg-formato'):'',
+    edicion: soporte==='fisico'?getToggleValue('tg-edicion'):'',
+    impresion: soporte==='fisico'?getToggleValue('tg-impresion'):'',
+    editorial: soporte==='fisico'?document.getElementById('f-editorial').value.trim():'',
+    anio: soporte==='fisico'?document.getElementById('f-anio').value.trim():'',
+    pais: soporte==='fisico'?document.getElementById('f-pais').value.trim():'',
+    estado: soporte==='fisico'?getToggleValue('tg-estado'):'',
+    sobrecubierta: soporte==='fisico'?getToggleValue('tg-sobrecubierta'):'',
+    brodart: soporte==='fisico'?getToggleValue('tg-brodart'):'',
+    firmado: soporte==='fisico'?getToggleValue('tg-firmado'):'',
+    vitrina: soporte==='fisico'?getToggleValue('tg-vitrina'):'',
+    valor: soporte==='fisico'?document.getElementById('f-valor').value.trim():'',
+    notas: document.getElementById('f-notas').value.trim(),
+    fecha: new Date().toLocaleDateString('es-MX')
+  };
+  const editIdx = document.getElementById('edit-idx').value;
+  if (editIdx!=='') { libros[parseInt(editIdx)]=libro; } else { libros.push(libro); }
+  await saveData();
+  cancelarEdicion();
+  fotoPortada=null; fotoDerechos=null;
+  document.getElementById('preview-portada').innerHTML='<span style="font-size:22px;opacity:0.3">📷</span><span>Portada</span>';
+  document.getElementById('preview-derechos').innerHTML='<span style="font-size:22px;opacity:0.3">📄</span><span>Página</span>';
+  document.getElementById('btn-escanear').disabled=true;
+  document.getElementById('scan-status').textContent='';
+}
+
+async function eliminarLibro(idx) {
+  if (!confirm('¿Eliminar "'+libros[idx].titulo+'" del catálogo?')) return;
+  libros.splice(idx,1);
+  await saveData();
+  renderBiblioteca();
+}
+
+function limpiarFormulario() {
+  soporte='';
+  document.getElementById('btn-fisico').classList.remove('active');
+  document.getElementById('btn-digital').classList.remove('active');
+  document.querySelectorAll('.campos-fisico').forEach(el=>el.classList.remove('visible'));
+  ['f-titulo','f-autor','f-editorial','f-anio','f-pais','f-valor','f-notas','f-idioma-otro'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('autofilled');}});
+  ['tg-idioma','tg-formato','tg-edicion','tg-impresion','tg-estado','tg-sobrecubierta','tg-brodart','tg-firmado','tg-vitrina'].forEach(id=>{document.querySelectorAll('#'+id+' .toggle').forEach(b=>b.classList.remove('selected'));});
+  document.getElementById('f-idioma-otro').classList.remove('visible');
+}
+
+function renderPendientes() {
+  const el = document.getElementById('lista-pendientes');
+  if (!pendientes.length) { el.innerHTML='<div class="empty"><span class="empty-monogram">B|M</span>Lista de pendientes vacía</div>'; return; }
+  const grupos={'Alta':[],'Media':[],'Baja':[],'':[]};
+  pendientes.forEach(p=>{const g=p.prioridad||'';if(!grupos[g])grupos[g]=[];grupos[g].push(p);});
+  let html='';
+  ['Alta','Media','Baja',''].forEach(g=>{
+    if(!grupos[g]||!grupos[g].length) return;
+    if(g) html+='<div class="vitrina-label">Prioridad '+g+'</div>';
+    html+='<div class="book-list">';
+    grupos[g].forEach(p=>{
+      const idx=pendientes.indexOf(p);
+      const gridClass = isReadOnly ? 'pendiente-item pendiente-item-readonly' : 'pendiente-item';
+      const actions = isReadOnly ? '' : `<div class="book-actions">
+          <button class="action-btn" onclick="moverAColeccion(${idx})" title="Mover a colección">&#10003;</button>
+          <button class="action-btn" onclick="eliminarPendiente(${idx})" title="Eliminar">&#10005;</button>
+        </div>`;
+      html+=`<div class="${gridClass}">
+        <div><div class="book-title">${esc(p.titulo)}</div><div class="book-author">${esc(p.autor||'')}</div>${p.notas?'<div class="book-meta" style="margin-top:3px;">'+esc(p.notas)+'</div>':''}</div>
+        <div><span class="badge">${esc(p.razon||'')}</span></div>
+        <div>${prioridadBadge(p.prioridad)}</div>
+        ${actions}
+      </div>`;
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+async function agregarPendiente() {
+  const titulo=document.getElementById('p-titulo').value.trim();
+  if(!titulo){alert('El título es obligatorio');return;}
+  pendientes.push({titulo,autor:document.getElementById('p-autor').value.trim(),razon:getToggleValue('tg-p-razon'),prioridad:getToggleValue('tg-p-prioridad'),notas:document.getElementById('p-notas').value.trim()});
+  await saveData();
+  limpiarPendiente();
+  renderPendientes();
+}
+
+async function eliminarPendiente(i) {
+  if(!confirm('¿Eliminar pendiente?')) return;
+  pendientes.splice(i,1);
+  await saveData();
+  renderPendientes();
+}
+
+function moverAColeccion(i) {
+  const p=pendientes[i];
+  document.getElementById('f-titulo').value=p.titulo;
+  if(p.autor) document.getElementById('f-autor').value=p.autor;
+  if(p.notas) document.getElementById('f-notas').value=p.notas;
+  pendientes.splice(i,1);
+  saveData();
+  document.getElementById('tab-btn-registro').click();
+  window.scrollTo(0,0);
+}
+
+function limpiarPendiente() {
+  ['p-titulo','p-autor','p-notas'].forEach(id=>{document.getElementById(id).value='';});
+  ['tg-p-razon','tg-p-prioridad'].forEach(id=>document.querySelectorAll('#'+id+' .toggle').forEach(b=>b.classList.remove('selected')));
+}
+
+loadData().then(() => {
+  initView();
+  renderBiblioteca();
+  renderPendientes();
+});
+</script>
+</body>
+</html>
