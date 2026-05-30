@@ -54,7 +54,7 @@ Si no puedes determinar un campo, usa "".` });
         const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
-          body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content }] })
+          body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 1000, messages: [{ role: 'user', content }] })
         });
         const aiData = await aiRes.json();
         const text = aiData.content && aiData.content[0] ? aiData.content[0].text : '';
