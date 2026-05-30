@@ -3,6 +3,7 @@
   publish = "."
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/data"
+  to = "/.netlify/functions/data"
   status = 200
+  force = true
