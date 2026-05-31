@@ -373,11 +373,14 @@ body{font-family:'Jost',sans-serif;font-weight:300;background:#fafaf8;color:#1a1
 
   <!-- BIBLIOTECA -->
   <div id="tab-biblioteca" class="section">
-    <div class="stats">
+    <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:1px;">
       <div class="stat"><div class="stat-n" id="st-tot">0</div><div class="stat-l">Total</div></div>
       <div class="stat"><div class="stat-n" id="st-fis">0</div><div class="stat-l">Físicos</div></div>
       <div class="stat"><div class="stat-n" id="st-dig">0</div><div class="stat-l">Digitales</div></div>
+    </div>
+    <div class="stats" style="grid-template-columns:repeat(2,1fr);margin-top:1px;margin-bottom:1.75rem;">
       <div class="stat"><div class="stat-n" id="st-col">0</div><div class="stat-l">Colección</div></div>
+      <div class="stat"><div class="stat-n" id="st-bib">0</div><div class="stat-l">Biblioteca</div></div>
     </div>
     <div class="share-row" id="share-row">
       <button class="btn btn-s" onclick="compartir('biblioteca')">Compartir biblioteca</button>
@@ -486,7 +489,10 @@ function exportCSV(){
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('vis');setTimeout(()=>e.classList.remove('vis'),2500);}
 
 async function loadData(){
-  try{const r=await fetch(API),d=await r.json();libros=d.libros||[];pendientes=d.pendientes||[];}
+  try{const r=await fetch(API),d=await r.json();libros=d.libros||[];pendientes=d.pendientes||[];
+  // Migrar formato viejo
+  libros.forEach(l=>{if(l.vitrina)l.vitrina=normV(l.vitrina);});
+  pendientes.forEach(p=>{if(!p.intencion&&p.razon)p.intencion=p.razon;});}
   catch(e){libros=[];pendientes=[];}
 }
 async function saveData(){
@@ -570,6 +576,14 @@ function vBadge(v){
   return'<span class="badge '+cls+'">'+v+'</span>';
 }
 
+function normV(v){
+  if(!v)return'Sin vitrina';
+  if(v.startsWith('1 —')||v==='Inversión')return'Colección';
+  if(v.startsWith('2 —'))return'Colección';
+  if(v.startsWith('3 —'))return'Biblioteca';
+  if(v.startsWith('4 —'))return'Circular';
+  return v;
+}
 function sortLibros(arr){
   const o=document.getElementById('f-ord')?document.getElementById('f-ord').value:'rec';
   const s=[...arr];
@@ -586,7 +600,7 @@ function renderBib(){
   const sop=document.getElementById('f-sop').value;
   let fl=libros.filter(l=>{
     const m=(l.titulo+' '+l.autor).toLowerCase().includes(txt);
-    const v=!vit||l.vitrina===vit;
+    const v=!vit||normV(l.vitrina)===vit;
     const s=!sop||l.soporte===sop;
     return m&&v&&s;
   });
@@ -594,20 +608,12 @@ function renderBib(){
   document.getElementById('st-tot').textContent=libros.length;
   document.getElementById('st-fis').textContent=libros.filter(l=>l.soporte==='fisico').length;
   document.getElementById('st-dig').textContent=libros.filter(l=>l.soporte==='digital').length;
-  document.getElementById('st-col').textContent=libros.filter(l=>l.vitrina==='Colección').length;
+  document.getElementById('st-col').textContent=libros.filter(l=>normV(l.vitrina)==='Colección').length;
+  document.getElementById('st-bib').textContent=libros.filter(l=>normV(l.vitrina)==='Biblioteca').length;
   const el=document.getElementById('lista-bib');
   if(!fl.length){el.innerHTML='<div class="empty"><span class="empty-m">B|M</span>Ningún libro registrado aún</div>';return;}
   const g={};
-  fl.forEach(l=>{
-    let v=l.vitrina||'Sin vitrina';
-    // Normalizar formato anterior: "1 — Inversión" → "Colección", "2 — Colección" → "Colección", "3 — Biblioteca" → "Biblioteca", "4 — Circular" → "Circular"
-    if(v.startsWith('1 —')||v==='Inversión')v='Colección';
-    else if(v.startsWith('2 —'))v='Colección';
-    else if(v.startsWith('3 —'))v='Biblioteca';
-    else if(v.startsWith('4 —'))v='Circular';
-    const k=l.soporte==='digital'?'Digital':v;
-    if(!g[k])g[k]=[];g[k].push(l);
-  });
+  fl.forEach(l=>{const k=l.soporte==='digital'?'Digital':normV(l.vitrina);if(!g[k])g[k]=[];g[k].push(l);});
   let html='';
   ['Colección','Biblioteca','Circular','Sin vitrina','Digital'].filter(k=>g[k]).forEach(k=>{
     html+='<div class="v-lbl">'+k+'</div><div class="book-list">';
