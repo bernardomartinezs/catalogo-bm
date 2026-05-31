@@ -150,7 +150,7 @@ body{font-family:'Jost',sans-serif;font-weight:300;background:#fafaf8;color:#1a1
 .book-a{color:#888880;font-size:11px;margin-top:2px;}
 .book-m{font-size:10px;color:#aaa9a0;line-height:1.6;}
 .badge{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.5rem;border:0.5px solid #c4c2b8;color:#888880;white-space:nowrap;display:inline-block;}
-.b-col{border-color:#8B7355;color:#8B7355;}
+.b-pie{border-color:#6B5B8B;color:#6B5B8B;}.b-col{border-color:#8B7355;color:#8B7355;}
 .b-bib{border-color:#5A7A5A;color:#5A7A5A;}
 .b-cir{border-color:#a05050;color:#a05050;}
 .b-dig{border-color:#7a88a0;color:#7a88a0;}
@@ -345,7 +345,7 @@ body{font-family:'Jost',sans-serif;font-weight:300;background:#fafaf8;color:#1a1
       <!-- 16. Vitrina -->
       <div class="cf" id="cf-vit">
         <div class="fila-lbl">Vitrina</div>
-        <div class="caja"><div class="tg" id="tg-vit"><button class="tgl" onclick="tgl(this,'tg-vit')">Colección</button><button class="tgl" onclick="tgl(this,'tg-vit')">Biblioteca</button><button class="tgl" onclick="tgl(this,'tg-vit')">Circular</button></div></div>
+        <div class="caja"><div class="tg" id="tg-vit"><button class="tgl" onclick="tgl(this,'tg-vit')">Piezas</button><button class="tgl" onclick="tgl(this,'tg-vit')">Colección</button><button class="tgl" onclick="tgl(this,'tg-vit')">Biblioteca</button><button class="tgl" onclick="tgl(this,'tg-vit')">Circular</button></div></div>
       </div>
       <!-- 17. Valor -->
       <div class="cf" id="cf-val">
@@ -378,7 +378,8 @@ body{font-family:'Jost',sans-serif;font-weight:300;background:#fafaf8;color:#1a1
       <div class="stat"><div class="stat-n" id="st-fis">0</div><div class="stat-l">Físicos</div></div>
       <div class="stat"><div class="stat-n" id="st-dig">0</div><div class="stat-l">Digitales</div></div>
     </div>
-    <div class="stats" style="grid-template-columns:repeat(2,1fr);margin-top:1px;margin-bottom:1.75rem;">
+    <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-top:1px;margin-bottom:1.75rem;">
+      <div class="stat"><div class="stat-n" id="st-pie">0</div><div class="stat-l">Piezas</div></div>
       <div class="stat"><div class="stat-n" id="st-col">0</div><div class="stat-l">Colección</div></div>
       <div class="stat"><div class="stat-n" id="st-bib">0</div><div class="stat-l">Biblioteca</div></div>
     </div>
@@ -391,6 +392,7 @@ body{font-family:'Jost',sans-serif;font-weight:300;background:#fafaf8;color:#1a1
       <input type="text" id="f-busca" placeholder="Buscar título o autor..." oninput="renderBib()">
       <select id="f-vit" onchange="renderBib()">
         <option value="">Todas las vitrinas</option>
+        <option value="Piezas">Piezas</option>
         <option value="Colección">Colección</option>
         <option value="Biblioteca">Biblioteca</option>
         <option value="Circular">Circular</option>
@@ -578,7 +580,7 @@ function setSop(s){
 
 function vBadge(v){
   if(!v)return'';
-  const cls=v==='Colección'?'b-col':v==='Biblioteca'?'b-bib':'b-cir';
+  const cls=v==='Piezas'?'b-pie':v==='Colección'?'b-col':v==='Biblioteca'?'b-bib':'b-cir';
   return'<span class="badge '+cls+'">'+v+'</span>';
 }
 
@@ -614,6 +616,7 @@ function renderBib(){
   document.getElementById('st-tot').textContent=libros.length;
   document.getElementById('st-fis').textContent=libros.filter(l=>l.soporte==='fisico').length;
   document.getElementById('st-dig').textContent=libros.filter(l=>l.soporte==='digital').length;
+  document.getElementById('st-pie').textContent=libros.filter(l=>normV(l.vitrina)==='Piezas').length;
   document.getElementById('st-col').textContent=libros.filter(l=>normV(l.vitrina)==='Colección').length;
   document.getElementById('st-bib').textContent=libros.filter(l=>normV(l.vitrina)==='Biblioteca').length;
   const el=document.getElementById('lista-bib');
@@ -621,7 +624,7 @@ function renderBib(){
   const g={};
   fl.forEach(l=>{const k=l.soporte==='digital'?'Digital':normV(l.vitrina);if(!g[k])g[k]=[];g[k].push(l);});
   let html='';
-  ['Colección','Biblioteca','Circular','Sin vitrina','Digital'].filter(k=>g[k]).forEach(k=>{
+  ['Piezas','Colección','Biblioteca','Circular','Sin vitrina','Digital'].filter(k=>g[k]).forEach(k=>{
     html+='<div class="v-lbl">'+k+'</div><div class="book-list">';
     g[k].forEach(l=>{
       const idx=libros.indexOf(l);
@@ -647,10 +650,17 @@ function renderBib(){
 
 async function cirAPend(idx){
   const l=libros[idx];
-  if(!confirm('"'+l.titulo+'" pasará a Pendientes. ¿Continuar?'))return;
-  pendientes.push({titulo:l.titulo,autor:l.autor||'',intencion:'Biblioteca',notas:'Movido desde Circular'});
+  if(!confirm('"'+l.titulo+'" pasará a Pendientes para editar. ¿Continuar?'))return;
   libros.splice(idx,1);
-  await saveData();renderBib();
+  await saveData();
+  // Pre-fill pendientes form and switch to tab
+  document.getElementById('p-tit').value=l.titulo;
+  document.getElementById('p-aut').value=l.autor||'';
+  document.getElementById('p-not').value='';
+  document.querySelectorAll('#tg-pint .tgl').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tb-pen').click();
+  window.scrollTo(0,0);
+  toast('Completa el pendiente y guarda');
 }
 
 function digAPend(){
