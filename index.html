@@ -598,7 +598,16 @@ function renderBib(){
   const el=document.getElementById('lista-bib');
   if(!fl.length){el.innerHTML='<div class="empty"><span class="empty-m">B|M</span>Ningún libro registrado aún</div>';return;}
   const g={};
-  fl.forEach(l=>{const k=l.soporte==='digital'?'Digital':(l.vitrina||'Sin vitrina');if(!g[k])g[k]=[];g[k].push(l);});
+  fl.forEach(l=>{
+    let v=l.vitrina||'Sin vitrina';
+    // Normalizar formato anterior: "1 — Inversión" → "Colección", "2 — Colección" → "Colección", "3 — Biblioteca" → "Biblioteca", "4 — Circular" → "Circular"
+    if(v.startsWith('1 —')||v==='Inversión')v='Colección';
+    else if(v.startsWith('2 —'))v='Colección';
+    else if(v.startsWith('3 —'))v='Biblioteca';
+    else if(v.startsWith('4 —'))v='Circular';
+    const k=l.soporte==='digital'?'Digital':v;
+    if(!g[k])g[k]=[];g[k].push(l);
+  });
   let html='';
   ['Colección','Biblioteca','Circular','Sin vitrina','Digital'].filter(k=>g[k]).forEach(k=>{
     html+='<div class="v-lbl">'+k+'</div><div class="book-list">';
