@@ -492,7 +492,13 @@ async function loadData(){
   try{const r=await fetch(API),d=await r.json();libros=d.libros||[];pendientes=d.pendientes||[];
   // Migrar formato viejo
   libros.forEach(l=>{if(l.vitrina)l.vitrina=normV(l.vitrina);});
-  pendientes.forEach(p=>{if(!p.intencion&&p.razon)p.intencion=p.razon;});}
+  pendientes.forEach(p=>{
+    if(!p.intencion&&p.razon){
+      if(p.razon==='Colección / Inversión'||p.razon==='Ambos')p.intencion='Colección';
+      else if(p.razon==='Quiero leerlo')p.intencion='Biblioteca';
+      else p.intencion=p.razon;
+    }
+  });}
   catch(e){libros=[];pendientes=[];}
 }
 async function saveData(){
@@ -759,7 +765,7 @@ function renderPend(){
   const g={'Colección':[],'Biblioteca':[],'':[]};
   pendientes.forEach(p=>{const k=p.intencion||p.razon||'';if(!g[k])g[k]=[];g[k].push(p);});
   let html='';
-  ['Colección','Biblioteca',''].forEach(k=>{
+  ['Colección','Biblioteca','Quiero leerlo','Colección / Inversión','Ambos',''].forEach(k=>{
     if(!g[k]||!g[k].length)return;
     if(k)html+='<div class="v-lbl">'+k+'</div>';
     html+='<div class="book-list">';
